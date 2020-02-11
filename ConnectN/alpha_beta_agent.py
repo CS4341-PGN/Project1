@@ -26,6 +26,58 @@ class AlphaBetaAgent(agent.Agent):
     def go(self, brd):
         """Search for the best move (choice of column for the token)"""
         # Your code here
+        inf = float('inf')
+        best = -inf
+        best_action = None
+
+        for (nb, col) in self.get_successors(brd):      # check every successor
+            v = self.min(nb, best, inf, self.max_depth)  # choose the worst case for the other player
+            if v > best:
+                best = v    # update best value
+                best_action = col   # update action
+        return best_action
+
+    def min(self, brd, alpha, beta, depth):
+        if self.is_end(brd):    # check if game over
+            return self.h(brd)  # return score
+        if depth == 0:          # check if no need more depth
+            return self.h(brd)  # return score
+        v = float('inf')
+        for (nb, col) in self.get_successors(brd):
+            v = min(v, self.max(nb, alpha, beta, depth-1))  # the other will choose the worst case for us
+            if v <= alpha:
+                return v    # return the value
+            beta = min(beta, v) # update beta
+        return v
+
+    def max(self, brd, alpha, beta, depth):
+        if self.is_end(brd):    # check if game over
+            return self.h(brd)  # return score
+        if depth == 0:          # check if no need more depth
+            return self.h(brd)  # return score
+        v = -float('inf')
+        for (nb, col) in self.get_successors(brd):
+            v = max(v, self.min(nb, alpha, beta, depth-1))  # the best case for us
+            if v >= beta:
+                return v
+            alpha = max(alpha, v) # update alpha
+        return v
+
+    def is_end(self, brd):
+        """check if game over"""
+        return brd.get_outcome() == 0
+
+    def h(self, brd):
+        """just check if any win then the other"""
+        my, oppo = 0, 0
+        for i in range(brd.w):
+            for j in range(brd.h):
+                if brd.is_any_line_at(i, j):  # if at a cell, exist a line to win
+                    if brd.board[j][i] == self.player:
+                        my += 1
+                    else:
+                        oppo += 1
+        return my-oppo
 
     # Get the successors of the given board.
     #
