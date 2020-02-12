@@ -86,6 +86,67 @@ class AlphaBetaAgent(agent.Agent):
             beta = min(beta, v) # update alpha
         return v
         
+
+    def heuristic(self, brd):
+        score = 0
+        player = self.player
+        for y in range(brd.h):
+            for x in range(brd.w):
+                if brd.board[y][x] == player:
+                    score +=1
+                    if x == 3:
+                        score +=2
+                    if brd.is_any_line_at(x, y):
+                        score += 1000
+                    else: 
+                        score += connectn(brd, x, y, 1, 0, player)
+                        score += connectn(brd, x, y, 1, 1, player)
+                        score += connectn(brd, x, y, 1, -1, player)
+                        score += connectn(brd, x, y, 0, 1, player)
+                elif brd.board[y][x] != player && brd.board[y][x] != 0:
+                    other = brd.board[y][x]
+                    score -=1
+                    if x == 3:
+                        score -=2
+                    if brd.is_any_line_at(x, y):
+                        score -= 1000
+                    else: 
+                        score -= connectn(brd, x, y, 1, 0, other)
+                        score -= connectn(brd, x, y, 1, 1, other)
+                        score -= connectn(brd, x, y, 1, -1, other)
+                        score -= connectn(brd, x, y, 0, 1, other)
+        return score
+                    
+
+    def connectn(self, brd, x, y, dx, dy, player):
+        score = 0
+        connected = 1
+        bonus = 0
+        blocked = 0
+        column = 0
+        for i in range(1, 5):
+            if y + i*dy >= brd.h or x +i*dx >= brd.w or y + i*dy < 0:
+                blocked = 1
+                break
+            if brd.board[y+i*dy][x+i*dx] == player && connected == 1:
+                score += (i+1)**2
+            elif brd.board[y+i*dy][x+i*dx] == 0 && connected == 1:
+                connected = 0
+                bonus = i**2
+                score += bonus
+                column = x+i*dx
+            elif brd.board[y+i*dy][x+i*dx] == player:
+                connected = 0
+                blocked = 1
+
+        if y-dy>=0 && y-dy<brd.h && x-dx >=0:
+            if brd.board[y-dy][x-dx] == player:
+                score += bonus
+        return score
+        # if blocked == 0 && dx != 0:
+
+
+
         
     
 
