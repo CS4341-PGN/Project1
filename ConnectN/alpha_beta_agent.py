@@ -116,6 +116,7 @@ class AlphaBetaAgent(agent.Agent):
     def heuristic(self, brd):
         score = 0
         player = self.player
+        other = 3-player
         for y in range(brd.h):
             for x in range(brd.w):
                 if brd.board[y][x] == player:
@@ -129,8 +130,9 @@ class AlphaBetaAgent(agent.Agent):
                         score += self.connectn(brd, x, y, 1, 1, player)
                         score += self.connectn(brd, x, y, 1, -1, player)
                         score += self.connectn(brd, x, y, 0, 1, player)
+                    score += self.block(brd, x, y, other)
+                    
                 elif brd.board[y][x] != player and brd.board[y][x] != 0:
-                    other = brd.board[y][x]
                     score -=1
                     if x == 3:
                         score -=2
@@ -143,6 +145,18 @@ class AlphaBetaAgent(agent.Agent):
                         score -= self.connectn(brd, x, y, 0, 1, other)
         return score
                     
+
+    def block(self, brd, x, y, player):
+        score = 0
+        if self.is3at(brd, 3, x, y, 1, 0, player):
+            score += 16
+        if self.is3at(brd, 3, x, y, 1, 1, player):
+            score += 16
+        if self.is3at(brd, 3, x, y, 1, -1, player):
+            score += 16
+        if self.is3at(brd, 3, x, y, 0, 1, player):
+            score += 16
+        return score
 
     def connectn(self, brd, x, y, dx, dy, player):
         score = 0
@@ -175,6 +189,17 @@ class AlphaBetaAgent(agent.Agent):
         # if blocked == 0 && dx != 0:
 
 
+    def is3at(self, brd, n, x, y, dx, dy, player):
+        """Return True if a line of identical tokens exists starting at (x,y) in direction (dx,dy)"""
+        # Avoid out-of-bounds errors
+        if ((x + (n-1) * dx >= brd.w) or
+            (y + (n-1) * dy < 0) or (y + (n-1) * dy >= brd.h)):
+            return False
+        # Go through elements
+        for i in range(1, n):
+            if brd.board[y + i*dy][x + i*dx] != player:
+                return False
+        return True
 
         
 #----------------------------------------------------------------------------- 
