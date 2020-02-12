@@ -163,13 +163,16 @@ class AlphaBetaAgent(agent.Agent):
             if y + i*dy >= brd.h or x +i*dx >= brd.w or y + i*dy < 0:
                 blocked = 1
                 break
-            if brd.board[y+i*dy][x+i*dx] == player and connected == 1:
+            if brd.board[y+i*dy][x+i*dx] == player and connected >= 1:
                 score += (i+1)**2
-            elif brd.board[y+i*dy][x+i*dx] == 0 and connected == 1:
+                connected += 1
+            elif brd.board[y+i*dy][x+i*dx] == 0 and connected == 3:
                 connected = 0
                 bonus = i**2
                 score += bonus
                 column = x+i*dx
+            elif brd.board[y+i*dy][x+i*dx] == 0:
+                connected = 0
             elif brd.board[y+i*dy][x+i*dx] == player:
                 connected = 0
                 blocked = 1
