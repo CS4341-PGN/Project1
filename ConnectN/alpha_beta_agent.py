@@ -163,7 +163,6 @@ class AlphaBetaAgent(agent.Agent):
         connected = 1
         bonus = 0
         blocked = 0
-        column = 0
         for i in range(1, 5):
             if y + i*dy >= brd.h or x +i*dx >= brd.w or y + i*dy < 0:
                 blocked = 1
@@ -173,18 +172,40 @@ class AlphaBetaAgent(agent.Agent):
                 connected += 1
             elif brd.board[y+i*dy][x+i*dx] == 0 and connected == 3:
                 connected = 0
-                bonus = i**2
+                if player == self.player:
+                    if y+i*dy-1 = 0:
+                        bonus = i**2 + 5
+                    elif y+i*dy-1 > 0:
+                        if brd.board[y+i*dy-1][x+i*dx] != 0:
+                            bonus = i**2 + 5
+                        else:
+                            bonus = i**2 - 2
+                else:
+                    bonus = i**2
+                
                 score += bonus
-                column = x+i*dx
             elif brd.board[y+i*dy][x+i*dx] == 0:
                 connected = 0
             elif brd.board[y+i*dy][x+i*dx] == player:
                 connected = 0
                 blocked = 1
 
-        if y-dy>=0 and y-dy<brd.h and x-dx >=0:
-            if brd.board[y-dy][x-dx] == player:
-                score += bonus
+        if player == self.player:
+            if y-dy>=0 and y-dy<brd.h and x-dx >=0:
+                if brd.board[y-dy][x-dx] == 0:
+                    if y-dy-1 = 0:
+                        score += (connected-1)**2+5
+                    elif y-dy-1 > 0:
+                        if brd.board[y-dy-1][x-dx] != 0:
+                            bonus = (connected-1)**2 + 5
+                        else:
+                            bonus = (connected-1)**2 - 2
+            if connected > 1:
+                if y + 3*dy >= brd.h or x +3*dx >= brd.w or y + 3*dy < 0:
+                    score -= 5
+                elif y + 3*dy < brd.h or x +3*dx < brd.w or y + 3*dy >= 0:
+                    if brd.board[y + 3*dy][x +3*dx] != 0:
+                        score -= 5
         return score
         # if blocked == 0 && dx != 0:
 
