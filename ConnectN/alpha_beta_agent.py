@@ -33,27 +33,10 @@ class AlphaBetaAgent(agent.Agent):
     def abp(self, brd, depth):
         inf = float('inf')
         ninf = -float('inf')
-        best_maxv = -float('inf')
-        best_minv = float('inf')
-        best_move = 0;
-        
-        
-        # STOP AT MAX NODE Depth number shall be set
-#        if depth%2 == 1:
-        for (nb, col) in self.get_successors(brd):
-            v = self.max_value(nb, ninf, inf, depth)
-            if v > best_maxv:
-                best_maxv = v      # update best value
-                best_move = col # update action
+        best_move = self.max_value(brd, ninf, inf, depth)
+         
         return best_move
-        # STOP AT MIN NODE
-#        else:
-#            for (nb, col) in self.get_successors(brd):
-#                v = self.min_value(nb, ninf, inf, depth)
-#                if v < best_minv:
-#                    best_minv = v      # update best value
-#                    best_move = col # update action
-#            return best_move
+        
         
         
 #    def max_value(self, brd, alpha, beta, depth):
@@ -97,13 +80,21 @@ class AlphaBetaAgent(agent.Agent):
             x = self.heuristic(brd)
             return x
         v = -float('inf')
+        best_col = 0
         
         for (nb, col) in self.get_successors(brd):
-            v = max(v, self.min_value(nb, alpha, beta, depth-1))  # the best case for us
+            v = max(v, self.min_value(nb, alpha, beta, depth-1))  
             if v >= beta:
                 return v
-            alpha = max(alpha, v) # update alpha
-        return v
+            
+            if v > alpha: # update alpha
+                alpha = v
+                best_col = col
+             
+        if depth == self.max_depth:
+            return best_col
+        else:
+            return v
     
     def min_value(self, brd, alpha, beta, depth):
 #        if self.is_end(brd):
@@ -114,7 +105,7 @@ class AlphaBetaAgent(agent.Agent):
         v = float('inf')
     
         for (nb, col) in self.get_successors(brd):
-            v = min(v, self.max_value(nb, alpha, beta, depth-1)) # the best case for us
+            v = min(v, self.max_value(nb, alpha, beta, depth-1)) 
             if v <= alpha:
                 return v
             beta = min(beta, v) # update alpha
