@@ -28,7 +28,7 @@ class AlphaBetaAgent(agent.Agent):
         """Search for the best move (choice of column for the token)"""
         # Your code here
         
-        return self.abp(brd, 3)
+        return self.abp(brd, self.max_depth)
 
     def abp(self, brd, depth):
         inf = float('inf')
@@ -73,21 +73,6 @@ class AlphaBetaAgent(agent.Agent):
 #            alpha = max(alpha, v) # update alpha
 #        return v
     
-    def max_value(self, brd, alpha, beta, depth):
-#        if self.is_end(brd):
-#            return float('inf')
-        if depth == 0:    # check if game over
-            x = self.heuristic(brd)
-            return x
-        v = -float('inf')
-        
-        for (nb, col) in self.get_successors(brd):
-            v = max(v, self.min_value(nb, alpha, beta, depth-1))  # the best case for us
-            if v >= beta:
-                return v
-            alpha = max(alpha, v) # update alpha
-        return v
-    
 #    def min_value(self, brd, alpha, beta, depth):
 ##        if self.is_end(brd):
 ##            return -float('inf')
@@ -104,6 +89,21 @@ class AlphaBetaAgent(agent.Agent):
 #                return v
 #            beta = min(beta, v) # update alpha
 #        return v
+        
+    def max_value(self, brd, alpha, beta, depth):
+#        if self.is_end(brd):
+#            return float('inf')
+        if depth == 0:    # check if game over
+            x = self.heuristic(brd)
+            return x
+        v = -float('inf')
+        
+        for (nb, col) in self.get_successors(brd):
+            v = max(v, self.min_value(nb, alpha, beta, depth-1))  # the best case for us
+            if v >= beta:
+                return v
+            alpha = max(alpha, v) # update alpha
+        return v
     
     def min_value(self, brd, alpha, beta, depth):
 #        if self.is_end(brd):
@@ -119,7 +119,8 @@ class AlphaBetaAgent(agent.Agent):
                 return v
             beta = min(beta, v) # update alpha
         return v
-        
+    
+#-----------------------------------------------------------------------------        
 
     def heuristic(self, brd):
         score = 0
@@ -182,7 +183,7 @@ class AlphaBetaAgent(agent.Agent):
 
 
         
-    
+#----------------------------------------------------------------------------- 
 
     def is_end(self, brd):
         """check if game over"""
