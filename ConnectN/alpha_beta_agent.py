@@ -173,7 +173,7 @@ class AlphaBetaAgent(agent.Agent):
             elif brd.board[y+i*dy][x+i*dx] == 0 and connected == 3:
                 connected = 0
                 if player == self.player:
-                    if y+i*dy-1 = 0:
+                    if y+i*dy-1 == 0:
                         bonus = i**2 + 5
                     elif y+i*dy-1 > 0:
                         if brd.board[y+i*dy-1][x+i*dx] != 0:
@@ -193,7 +193,7 @@ class AlphaBetaAgent(agent.Agent):
         if player == self.player:
             if y-dy>=0 and y-dy<brd.h and x-dx >=0:
                 if brd.board[y-dy][x-dx] == 0:
-                    if y-dy-1 = 0:
+                    if y-dy-1 == 0:
                         score += (connected-1)**2+5
                     elif y-dy-1 > 0:
                         if brd.board[y-dy-1][x-dx] != 0:
