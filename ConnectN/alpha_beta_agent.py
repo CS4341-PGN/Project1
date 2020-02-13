@@ -117,27 +117,30 @@ class AlphaBetaAgent(agent.Agent):
         score = 0
         player = self.player
         other = 3-player
+        # loop through the grid
         for y in range(brd.h):
             for x in range(brd.w):
+                # calculate score according to the player
                 if brd.board[y][x] == player:
-                    score +=1
+                    # encourage the bot to go to the middle
                     if x == 3:
                         score +=2
+                    # when there is a line add 1000 point because we want this situation
                     if brd.is_any_line_at(x, y):
-                        score += 1000
+                        score += 10000
                     else: 
+                        # count score depend on the value of neighbor
                         score += self.connectn(brd, x, y, 1, 0, player)
                         score += self.connectn(brd, x, y, 1, 1, player)
                         score += self.connectn(brd, x, y, 1, -1, player)
                         score += self.connectn(brd, x, y, 0, 1, player)
+                    # a node gets extra value if it blocks the other player
                     score += self.block(brd, x, y, other)
                     
                 elif brd.board[y][x] != player and brd.board[y][x] != 0:
-                    score -=1
-                    if x == 3:
-                        score -=2
+                    # count basic score for the opponents
                     if brd.is_any_line_at(x, y):
-                        score -= 1000
+                        score -= 10000
                     else: 
                         score -= self.connectn(brd, x, y, 1, 0, other)
                         score -= self.connectn(brd, x, y, 1, 1, other)
@@ -146,6 +149,8 @@ class AlphaBetaAgent(agent.Agent):
         return score
                     
 
+    # helper function to check if the node blocks other player 
+    # in any direction
     def block(self, brd, x, y, player):
         score = 0
         if self.is3at(brd, 3, x, y, 1, 0, player):
@@ -158,11 +163,16 @@ class AlphaBetaAgent(agent.Agent):
             score += 16
         return score
 
+    # helper function to calculate score for each node
     def connectn(self, brd, x, y, dx, dy, player):
         score = 0
         connected = 1
         bonus = 0
         blocked = 0
+
+        # loop through the next four node in the given direction
+        # if it's the same player than add point to the node 
+        # if there are three node connected and the next node is empty there will be extra points
         for i in range(1, 5):
             if y + i*dy >= brd.h or x +i*dx >= brd.w or y + i*dy < 0:
                 blocked = 1
@@ -190,6 +200,8 @@ class AlphaBetaAgent(agent.Agent):
                 connected = 0
                 blocked = 1
 
+        # the following if statement will check if the empty space can be placed with
+        # a piece the next step if so than there will be extra points
         if player == self.player:
             if y-dy>=0 and y-dy<brd.h and x-dx >=0:
                 if brd.board[y-dy][x-dx] == 0:
