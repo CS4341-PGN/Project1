@@ -109,6 +109,8 @@ class AlphaBetaAgent(agent.Agent):
                     score += self.block(brd, x, y, other)
                     
                 elif brd.board[y][x] != player and brd.board[y][x] != 0:
+                    if x == 3:
+                        score -=1
                     # count basic score for the opponents
                     if brd.is_any_line_at(x, y):
                         score -= 1000000
@@ -121,15 +123,7 @@ class AlphaBetaAgent(agent.Agent):
     # helper function to check if the node blocks other player 
     # in any direction
     def block(self, brd, x, y, player):
-        score = self.is3at(brd, 3, x, y, 1, 0, player)*self.is3at(brd, 3, x, y, 1, 1, player)*self.is3at(brd, 3, x, y, 1, -1, player)*self.is3at(brd, 3, x, y, 0, 1, player)
-#        if self.is3at(brd, 3, x, y, 1, 0, player):
-#            score += 16
-#        if self.is3at(brd, 3, x, y, 1, 1, player):
-#            score += 16
-#        if self.is3at(brd, 3, x, y, 1, -1, player):
-#            score += 16
-#        if self.is3at(brd, 3, x, y, 0, 1, player):
-#            score += 16
+        score = self.is3at(brd, brd.n-1, x, y, 1, 0, player)*self.is3at(brd, brd.n-1, x, y, 1, 1, player)*self.is3at(brd, brd.n-1, x, y, 1, -1, player)*self.is3at(brd, brd.n-1, x, y, 0, 1, player)
         return score
 
     # helper function to calculate score for each node
@@ -142,14 +136,14 @@ class AlphaBetaAgent(agent.Agent):
         # loop through the next four node in the given direction
         # if it's the same player than add point to the node 
         # if there are three node connected and the next node is empty there will be extra points
-        for i in range(1, 5):
+        for i in range(1, brd.n+1):
             if y + i*dy >= brd.h or x +i*dx >= brd.w or y + i*dy < 0:
                 blocked = 1
                 break
             if brd.board[y+i*dy][x+i*dx] == player and connected >= 1:
                 score += (i+1)**2
                 connected += 1
-            elif brd.board[y+i*dy][x+i*dx] == 0 and connected == 3:
+            elif brd.board[y+i*dy][x+i*dx] == 0 and connected == brd.n-1:
                 connected = 0
                 if player == self.player:
                     if y+i*dy-1 == 0:
@@ -182,10 +176,10 @@ class AlphaBetaAgent(agent.Agent):
                         else:
                             bonus = (connected-1)**2 - 2
             if connected > 1:
-                if y + 3*dy >= brd.h or x +3*dx >= brd.w or y + 3*dy < 0:
+                if y + (brd.n-1)*dy >= brd.h or x +(brd.n-1)*dx >= brd.w or y + (brd.n-1)*dy < 0:
                     score -= 5
-                elif y + 3*dy < brd.h or x +3*dx < brd.w or y + 3*dy >= 0:
-                    if brd.board[y + 3*dy][x +3*dx] != 0:
+                elif y + (brd.n-1)*dy < brd.h or x +(brd.n-1)*dx < brd.w or y + (brd.n-1)*dy >= 0:
+                    if brd.board[y + (brd.n-1)*dy][x +(brd.n-1)*dx] != 0:
                         score -= 5
         return score
         # if blocked == 0 && dx != 0:
