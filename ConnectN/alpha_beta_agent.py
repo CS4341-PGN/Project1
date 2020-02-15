@@ -91,13 +91,17 @@ class AlphaBetaAgent(agent.Agent):
         score = 0
         player = self.player
         other = 3-player
+        if brd.n == 4:
+            middle = 3
+        else:
+            middle = 5
         # loop through the grid
         for y in range(brd.h):
             for x in range(brd.w):
                 # calculate score according to the player
                 if brd.board[y][x] == player:
                     # encourage the bot to go to the middle
-                    if x == 3:
+                    if x == middle:
                         score +=2
                     # when there is a line add 1000 point because we want this situation
                     if brd.is_any_line_at(x, y):
@@ -109,7 +113,7 @@ class AlphaBetaAgent(agent.Agent):
                     score += self.block(brd, x, y, other)
                     
                 elif brd.board[y][x] != player and brd.board[y][x] != 0:
-                    if x == 3:
+                    if x == middle:
                         score -=1
                     # count basic score for the opponents
                     if brd.is_any_line_at(x, y):
@@ -132,6 +136,7 @@ class AlphaBetaAgent(agent.Agent):
         connected = 1
         bonus = 0
         blocked = 0
+
 
         # loop through the next four node in the given direction
         # if it's the same player than add point to the node 
