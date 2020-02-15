@@ -82,7 +82,7 @@ class AlphaBetaAgent(agent.Agent):
             v = min(v, self.max_value(nb, alpha, beta, depth-1)) 
             if v < alpha:
                 return v
-            beta = min(beta, v) # update alpha
+            beta = min(beta, v) # update beta
         return v
     
 #-----------------------------------------------------------------------------        

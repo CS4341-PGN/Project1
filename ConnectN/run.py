@@ -6,7 +6,7 @@ import alpha_beta_agentYZ as abaYZ
 
 
 # Set random seed for reproducibility
-random.seed(1)
+random.seed(10)
 
 #
 # Random vs. Random
@@ -29,19 +29,19 @@ random.seed(1)
 #
 # Random vs. AlphaBeta
 ##
-#g = game.Game(7, # width
-#              6, # height
-#              4, # tokens in a row to win
-#              agent.RandomAgent("random"),        # player 1
-#              aba.AlphaBetaAgent("alphabeta", 5)) # player 2
-
-# Alphabeta vs. AlphaBeta
-#
 g = game.Game(7, # width
               6, # height
               4, # tokens in a row to win
-              aba.AlphaBetaAgent("alphabeta", 5),        # player 1
-              aba.AlphaBetaAgent("alphabeta2", 5)) # player 2
+              agent.RandomAgent("random"),        # player 1
+              aba.AlphaBetaAgent("alphabeta", 6)) # player 2
+
+# Alphabeta vs. AlphaBeta
+#
+#g = game.Game(7, # width
+#              6, # height
+#              4, # tokens in a row to win
+#              aba.AlphaBetaAgent("alphabeta", 5),        # player 1
+#              aba.AlphaBetaAgent("alphabeta2", 5))       # player 2
 
 #
 ## Human vs. AlphaBeta
@@ -58,7 +58,7 @@ g = game.Game(7, # width
 #              6, # height
 #              4, # tokens in a row to win
 #              aba.AlphaBetaAgent("alphabeta", 5),
-#              agent.InteractiveAgent("human")) # player 2
+#              agent.InteractiveAgent("human")) 
 
 #
 # Human vs. Human
@@ -75,7 +75,7 @@ g = game.Game(7, # width
 #              6, # height
 #              4, # tokens in a row to win
 #              aba.AlphaBetaAgent("alphabeta", 5),
-#              abaYZ.AlphaBetaAgent("WYZ", 5)) # player 2
+#              abaYZ.AlphaBetaAgent("WYZ", 5)) 
 
 # Execute the game
 outcome = g.go()

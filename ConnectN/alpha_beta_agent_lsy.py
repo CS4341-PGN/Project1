@@ -31,7 +31,7 @@ class AlphaBetaAgent(agent.Agent):
         best_action = None
 
         for (nb, col) in self.get_successors(brd):      # check every successor
-            v = self.min(nb, best, inf, self.max_depth)  # choose the worst case for the other player
+            v = self.max_value(nb, -inf, inf, self.max_depth)  # choose the worst case for the other player
             if v > best:
                 best = v    # update best value
                 best_action = col   # update action
