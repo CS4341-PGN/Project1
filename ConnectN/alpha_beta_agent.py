@@ -1,6 +1,5 @@
 import math
 import agent
-from heapq import heappush, heappop
 
 ###########################
 # Alpha-Beta Search Agent #
@@ -37,54 +36,23 @@ class AlphaBetaAgent(agent.Agent):
          
         return best_move
         
-        
-        
-#    def max_value(self, brd, alpha, beta, depth):
-##        if self.is_end(brd):
-##            return float('inf')
-#        if depth == 0:    # check if game over
-#            return self.heuristic(brd)
-#        v = -float('inf')
-#        priQ = []
-#        for (nb, col) in self.get_successors(brd):
-#            heappush(priQ, self.min_value(nb, alpha, beta, depth-1)*-1)
-#            
-#        while(priQ):
-#            v = max(v, heappop(priQ)*-1)  # the best case for us
-#            if v >= beta:
-#                return v
-#            alpha = max(alpha, v) # update alpha
-#        return v
-    
-#    def min_value(self, brd, alpha, beta, depth):
-##        if self.is_end(brd):
-##            return -float('inf')
-#        if depth == 0:    # check if game over
-#            return self.heuristic(brd)
-#        v = float('inf')
-#        priQ = []
-#        for (nb, col) in self.get_successors(brd):
-#            heappush(priQ, self.max_value(nb, alpha, beta, depth-1))
-#            
-#        while(priQ):
-#            v = min(v, heappop(priQ))  # the best case for us
-#            if v <= alpha:
-#                return v
-#            beta = min(beta, v) # update alpha
-#        return v
-        
     def max_value(self, brd, alpha, beta, depth):
-#        if self.is_end(brd):
-#            return float('inf')
-        if depth == 0:    # check if game over
+        if depth == 0 or not self.get_successors(brd):   # terminal test
             x = self.heuristic(brd)
             return x
         v = -float('inf')
         best_col = 0
         
+#        priQ = []
+#        for (nb, col) in self.get_successors(brd):
+#            heappush(priQ, self.min_value(nb, alpha, beta, depth-1)*-1)
+#            
+#        while(priQ):
+#            v = max(v, heappop(priQ)*-1) 
+        
         for (nb, col) in self.get_successors(brd):
             v = max(v, self.min_value(nb, alpha, beta, depth-1))  
-            if v >= beta:
+            if v > beta:
                 return v
             
             if v > alpha: # update alpha
@@ -97,18 +65,23 @@ class AlphaBetaAgent(agent.Agent):
             return v
     
     def min_value(self, brd, alpha, beta, depth):
-#        if self.is_end(brd):
-#            return -float('inf')
-        if depth == 0:    # check if game over
+        if depth == 0 or not self.get_successors(brd):    # terminal test
             x = self.heuristic(brd)
             return x
         v = float('inf')
-    
+        
+#        priQ = []
+#        for (nb, col) in self.get_successors(brd):
+#            heappush(priQ, self.max_value(nb, alpha, beta, depth-1))
+#            
+#        while(priQ):
+#            v = min(v, heappop(priQ))    
+        
         for (nb, col) in self.get_successors(brd):
             v = min(v, self.max_value(nb, alpha, beta, depth-1)) 
-            if v <= alpha:
+            if v < alpha:
                 return v
-            beta = min(beta, v) # update alpha
+            beta = min(beta, v) # update beta
         return v
     
 #-----------------------------------------------------------------------------        
@@ -117,60 +90,64 @@ class AlphaBetaAgent(agent.Agent):
         score = 0
         player = self.player
         other = 3-player
+        if brd.n == 4:
+            middle = 3
+        else:
+            middle = 5
+        # loop through the grid
         for y in range(brd.h):
             for x in range(brd.w):
+                # calculate score according to the player
                 if brd.board[y][x] == player:
-                    score +=1
-                    if x == 3:
+                    # encourage the bot to go to the middle
+                    if x == middle:
                         score +=2
+                    # when there is a line add 1000 point because we want this situation
                     if brd.is_any_line_at(x, y):
-                        score += 1000
+                        score += 1000000
                     else: 
-                        score += self.connectn(brd, x, y, 1, 0, player)
-                        score += self.connectn(brd, x, y, 1, 1, player)
-                        score += self.connectn(brd, x, y, 1, -1, player)
-                        score += self.connectn(brd, x, y, 0, 1, player)
+                        # count score depend on the value of neighbor
+                        score = score + self.connectn(brd, x, y, 1, 0, player)*self.connectn(brd, x, y, 1, 1, player)*self.connectn(brd, x, y, 1, -1, player)*self.connectn(brd, x, y, 0, 1, player)
+                    # a node gets extra value if it blocks the other player
                     score += self.block(brd, x, y, other)
                     
                 elif brd.board[y][x] != player and brd.board[y][x] != 0:
-                    score -=1
-                    if x == 3:
-                        score -=2
+                    if x == middle:
+                        score -=1
+                    # count basic score for the opponents
                     if brd.is_any_line_at(x, y):
-                        score -= 1000
+                        score -= 1000000
                     else: 
-                        score -= self.connectn(brd, x, y, 1, 0, other)
-                        score -= self.connectn(brd, x, y, 1, 1, other)
-                        score -= self.connectn(brd, x, y, 1, -1, other)
-                        score -= self.connectn(brd, x, y, 0, 1, other)
+                        score = score - self.connectn(brd, x, y, 1, 0, other)*self.connectn(brd, x, y, 1, 1, other)*self.connectn(brd, x, y, 1, -1, other) *self.connectn(brd, x, y, 0, 1, other)
+                    score -= self.block(brd, x, y, other)
         return score
                     
 
+    # helper function to check if the node blocks other player 
+    # in any direction
     def block(self, brd, x, y, player):
-        score = 0
-        if self.is3at(brd, 3, x, y, 1, 0, player):
-            score += 16
-        if self.is3at(brd, 3, x, y, 1, 1, player):
-            score += 16
-        if self.is3at(brd, 3, x, y, 1, -1, player):
-            score += 16
-        if self.is3at(brd, 3, x, y, 0, 1, player):
-            score += 16
+        score = self.is3at(brd, brd.n-1, x, y, 1, 0, player)*self.is3at(brd, brd.n-1, x, y, 1, 1, player)*self.is3at(brd, brd.n-1, x, y, 1, -1, player)*self.is3at(brd, brd.n-1, x, y, 0, 1, player)
         return score
 
+    # helper function to calculate score for each node
     def connectn(self, brd, x, y, dx, dy, player):
         score = 0
         connected = 1
         bonus = 0
         blocked = 0
-        for i in range(1, 5):
+
+
+        # loop through the next four node in the given direction
+        # if it's the same player than add point to the node 
+        # if there are three node connected and the next node is empty there will be extra points
+        for i in range(1, brd.n+1):
             if y + i*dy >= brd.h or x +i*dx >= brd.w or y + i*dy < 0:
                 blocked = 1
                 break
             if brd.board[y+i*dy][x+i*dx] == player and connected >= 1:
                 score += (i+1)**2
                 connected += 1
-            elif brd.board[y+i*dy][x+i*dx] == 0 and connected == 3:
+            elif brd.board[y+i*dy][x+i*dx] == 0 and connected == brd.n-1:
                 connected = 0
                 if player == self.player:
                     if y+i*dy-1 == 0:
@@ -190,6 +167,8 @@ class AlphaBetaAgent(agent.Agent):
                 connected = 0
                 blocked = 1
 
+        # the following if statement will check if the empty space can be placed with
+        # a piece the next step if so than there will be extra points
         if player == self.player:
             if y-dy>=0 and y-dy<brd.h and x-dx >=0:
                 if brd.board[y-dy][x-dx] == 0:
@@ -201,10 +180,10 @@ class AlphaBetaAgent(agent.Agent):
                         else:
                             bonus = (connected-1)**2 - 2
             if connected > 1:
-                if y + 3*dy >= brd.h or x +3*dx >= brd.w or y + 3*dy < 0:
+                if y + (brd.n-1)*dy >= brd.h or x +(brd.n-1)*dx >= brd.w or y + (brd.n-1)*dy < 0:
                     score -= 5
-                elif y + 3*dy < brd.h or x +3*dx < brd.w or y + 3*dy >= 0:
-                    if brd.board[y + 3*dy][x +3*dx] != 0:
+                elif y + (brd.n-1)*dy < brd.h or x +(brd.n-1)*dx < brd.w or y + (brd.n-1)*dy >= 0:
+                    if brd.board[y + (brd.n-1)*dy][x +(brd.n-1)*dx] != 0:
                         score -= 5
         return score
         # if blocked == 0 && dx != 0:
@@ -219,8 +198,8 @@ class AlphaBetaAgent(agent.Agent):
         # Go through elements
         for i in range(1, n):
             if brd.board[y + i*dy][x + i*dx] != player:
-                return False
-        return True
+                return 1
+        return 8
 
         
 #----------------------------------------------------------------------------- 
@@ -265,3 +244,6 @@ class AlphaBetaAgent(agent.Agent):
             # Add board to list of successors
             succ.append((nb,col))
         return succ
+
+#-----------------------------------------------------------------------------
+THE_AGENT = AlphaBetaAgent("Group19", 5)
