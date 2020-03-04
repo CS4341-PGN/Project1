@@ -28,13 +28,13 @@ class TestCharacter(CharacterEntity):
       
         self.place_bomb()
     
-        (dx,dy) = self.expectimax_search(wrld, 0, None)
+        (dx,dy) = self.advance_search(wrld, 0, None)
         self.move(dx,dy)
         
         pass
 
 
-    def expectimax_search(self, wrld, depth, events):
+    def advance_search(self, wrld, depth, events):
         v = ninf
         act = (0,0)
         #terminal cases
@@ -82,7 +82,7 @@ class TestCharacter(CharacterEntity):
                     monst.move(mcell[0], mcell[1])
                     move += 1
                     (newWrld, newEvents) = wrld.next()
-                    move_val += self.expectimax_search(newWrld, depth+1, newEvents)
+                    move_val += self.advance_search(newWrld, depth+1, newEvents)
                 
                 if(depth == 0):
                     dist_to_best = self.better_move((bman.x + cell[0], bman.y + cell[1]), self.bestMove)
@@ -97,13 +97,13 @@ class TestCharacter(CharacterEntity):
                 (newWrld, newEvents) = wrld.next()
                 if(depth == 0):
                     dist_to_best = self.better_move((bman.x + cell[0], bman.y + cell[1]), self.bestMove)
-                    temp = self.expectimax_search(newWrld, depth+1, newEvents) 
+                    temp = self.advance_search(newWrld, depth+1, newEvents) 
                     temp -= dist_to_best
                     if temp > v:
                         act = (cell[0], cell[1])
                         v = temp
                 else:
-                     v = max(v, self.expectimax_search(newWrld, depth+1, newEvents))
+                     v = max(v, self.advance_search(newWrld, depth+1, newEvents))
         
         if (depth == 0):
             return act
