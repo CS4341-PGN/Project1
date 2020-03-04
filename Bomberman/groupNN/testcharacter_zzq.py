@@ -11,7 +11,10 @@ from queue import PriorityQueue
 maxDepth = 2
 inf = float('inf')
 ninf = -float('inf')
-sensitivity = 400
+alertRange = 400
+win = 90000000
+lose = -90000000000
+
 class TestCharacter(CharacterEntity):
 
     def do(self, wrld):
@@ -21,7 +24,7 @@ class TestCharacter(CharacterEntity):
 
       
         if a_star_move is not None:
-            self.bestmove = a_star_move
+            self.bestMove = a_star_move
       
         self.place_bomb()
     
@@ -40,16 +43,16 @@ class TestCharacter(CharacterEntity):
             for event in events: 
                 if event.tpe == event.BOMB_HIT_CHARACTER or event.tpe == event.CHARACTER_KILLED_BY_MONSTER:
                 # character is dead so worst evaluation
-                    return -90000000000
+                    return lose
                 elif event.tpe == event.CHARACTER_FOUND_EXIT:
                 # character is winning so best evaluation
-                    return 90000000
+                    return win
                 
         if depth >= maxDepth:
             return self.final_utility(wrld)
        
         
-        bman = next(iter(wrld.characters.values()))[0]#!!!!! 
+        bman = next(iter(wrld.characters.values()))[0]
         
         ms = wrld.monsters.values()
         hasMonst = False
@@ -57,7 +60,7 @@ class TestCharacter(CharacterEntity):
         if len(ms) == 1:
             hasMonst = True
             monst = next(iter(ms))[0]
-        elif len(ms) == 2:                          # when there are 2 monsters
+        elif len(ms) == 2:                          
             hasMonst = True
             monst1 = next(iter(ms))[0]
             monst2 = next(iter(ms))[0]
@@ -82,7 +85,7 @@ class TestCharacter(CharacterEntity):
                     move_val += self.expectimax_search(newWrld, depth+1, newEvents)
                 
                 if(depth == 0):
-                    dist_to_best = self.heuristic((bman.x + cell[0], bman.y + cell[1]), self.bestmove)
+                    dist_to_best = self.better_move((bman.x + cell[0], bman.y + cell[1]), self.bestMove)
                     temp = move_val / move - dist_to_best  
                     if temp > v:
                         act = (cell[0], cell[1])
@@ -93,7 +96,7 @@ class TestCharacter(CharacterEntity):
             else:
                 (newWrld, newEvents) = wrld.next()
                 if(depth == 0):
-                    dist_to_best = self.heuristic((bman.x + cell[0], bman.y + cell[1]), self.bestmove)
+                    dist_to_best = self.better_move((bman.x + cell[0], bman.y + cell[1]), self.bestMove)
                     temp = self.expectimax_search(newWrld, depth+1, newEvents) 
                     temp -= dist_to_best
                     if temp > v:
@@ -136,35 +139,27 @@ class TestCharacter(CharacterEntity):
                 return True
         return False
     
-    def final_utility(self, wrld):
-        c = next(iter(wrld.characters.values()))
-        c = c[0]
-        return self.eval1(wrld, c)
-
-    # Evaluate world based on:
-    #   1. distance to monster
-    #   2. 
-    def eval1(self, wrld, c):
-        if len(wrld.monsters.values()) == 0: return 0
-        mlist = next(iter(wrld.monsters.values()))
-        score = 0
-        for m in mlist:
-            distx = abs(c.x - m.x)
-            disty = abs(c.y - m.y)
-            if distx <= 2 and disty <= 2:
-                if distx <= 1 and disty <= 1:
-                    score -= 100000
-                score -= 10000
-            score -= sensitivity / (distx+disty)**2
-        return score
+    def better_move(self, moveA, moveB):
+        (x1, y1) = moveA
+        (x2, y2) = moveB
+        betterMove = abs(x1 - x2) + abs(y1 - y2)
+        return betterMove
     
-    # heuristic from one location to another
-    # node is just a tuple with (x, y)
-    def heuristic(self, a, b):
-        (x1, y1) = a
-        (x2, y2) = b
-        return abs(x1 - x2) + abs(y1 - y2)
-
+    def final_utility(self, wrld):
+        bman = next(iter(wrld.characters.values()))[0]
+        utility = 0
+        if len(wrld.monsters.values()) == 0: 
+            return utility
+        mls = next(iter(wrld.monsters.values()))
+        for monst in mls:
+            i = abs(bman.x - monst.x)
+            j = abs(bman.y - monst.y)
+            if i <= 2 and j <= 2:
+                if i <= 1 and j <= 1:
+                    utility -= 100000
+                utility -= 10000
+            utility -= alertRange / (i+j)**2
+        return utility
 #---------------------------------------------------------------------------------------
 
     def a_star_search(self, start, wrld):
