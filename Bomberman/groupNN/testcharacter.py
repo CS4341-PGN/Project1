@@ -1,9 +1,6 @@
-# This is necessary to find the main code
+sys.path.insert(0, '../bomberman')
 import sys
 import math
-
-sys.path.insert(0, '../bomberman')
-# Import necessary stuff
 from entity import CharacterEntity
 from colorama import Fore, Back
 from queue import PriorityQueue
@@ -26,7 +23,7 @@ class TestCharacter(CharacterEntity):
         if a_star_move is not None:
             self.bestMove = a_star_move
       
-        self.place_bomb()
+        self.place_bomb() #place the bomb as soon as it is allowed
     
         (dx,dy) = self.advance_search(wrld, 0, None)
         self.move(dx,dy)
@@ -37,15 +34,15 @@ class TestCharacter(CharacterEntity):
     def advance_search(self, wrld, depth, events):
         v = ninf
         act = (0,0)
-        #terminal cases
         
+        #terminal cases
         if depth != 0:
             for event in events: 
                 if event.tpe == event.BOMB_HIT_CHARACTER or event.tpe == event.CHARACTER_KILLED_BY_MONSTER:
-                # character is dead so worst evaluation
+                # bomberman is dead
                     return lose
                 elif event.tpe == event.CHARACTER_FOUND_EXIT:
-                # character is winning so best evaluation
+                # bomberman is winning
                     return win
                 
         if depth >= maxDepth:
@@ -57,6 +54,7 @@ class TestCharacter(CharacterEntity):
         ms = wrld.monsters.values()
         hasMonst = False
         
+        # a logic to determine the closet threat of the monster
         if len(ms) == 1:
             hasMonst = True
             monst = next(iter(ms))[0]
@@ -70,7 +68,7 @@ class TestCharacter(CharacterEntity):
                 monst = monst1  
         
         moves = self.get_sucells(bman.x, bman.y, wrld)
-        moves.append((0,0))
+        moves.append((0,0)) # make sure the bomberman has upmost 9 possible moves
         for cell in moves:
             bman.move(cell[0], cell[1])
             
@@ -84,7 +82,7 @@ class TestCharacter(CharacterEntity):
                     (newWrld, newEvents) = wrld.next()
                     move_val += self.advance_search(newWrld, depth+1, newEvents)
                 
-                if(depth == 0):
+                if(depth == 0): #record the action instead of the value
                     dist_to_best = self.better_move((bman.x + cell[0], bman.y + cell[1]), self.bestMove)
                     temp = move_val / move - dist_to_best  
                     if temp > v:
@@ -95,7 +93,7 @@ class TestCharacter(CharacterEntity):
             
             else:
                 (newWrld, newEvents) = wrld.next()
-                if(depth == 0):
+                if(depth == 0): #record the action instead of the value
                     dist_to_best = self.better_move((bman.x + cell[0], bman.y + cell[1]), self.bestMove)
                     temp = self.advance_search(newWrld, depth+1, newEvents) 
                     temp -= dist_to_best
@@ -105,7 +103,7 @@ class TestCharacter(CharacterEntity):
                 else:
                      v = max(v, self.advance_search(newWrld, depth+1, newEvents))
         
-        if (depth == 0):
+        if (depth == 0): #return the action instead of the value
             return act
         return v
             
