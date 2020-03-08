@@ -1,5 +1,5 @@
-sys.path.insert(0, '../bomberman')
 import sys
+sys.path.insert(0, '../bomberman')
 import math
 from entity import CharacterEntity
 from colorama import Fore, Back
